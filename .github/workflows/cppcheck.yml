@@ -1,8 +1,6 @@
 name: cppcheck
 
-on:
-  workflow_dispatch:
-  push: [ main ]
+on: [push]
 
 jobs:
   build:
