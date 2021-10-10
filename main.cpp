@@ -10,10 +10,10 @@
 enum TokenType {Initial=0, Number=1, Operator=2, LBracket=4, RBracket=5};
 
 struct Token {
-    TokenType type;
-    uint8_t precedence;
-    std::string characters;
-    double value;
+    TokenType type = Initial;
+    uint8_t precedence = 0;
+    std::string characters = "";
+    double value = 0.0;
 };
 
 std::vector<Token> tokenize(std::string line) {
@@ -25,7 +25,7 @@ std::vector<Token> tokenize(std::string line) {
     for (uint8_t i = 0; i <= line.size(); ++i) {
         chr = i == line.size() ? '\0' : line[i];
         if (chr == ' ') continue; // Ignore spaces
-        if (chr >= '0' && chr <= '9' || chr == '.') {
+        if ((chr >= '0' && chr <= '9') || chr == '.') {
             state = Number;
         } else if (chr == '+' || chr == '-' || chr == '*' || chr == '/' || chr == '^') {
             state = Operator;
@@ -42,8 +42,8 @@ std::vector<Token> tokenize(std::string line) {
         if (prevState != state && tokenLength) {
             Token token;
             token.type = prevState;
+            token.type = Number;
             token.characters = line.substr(tokenStart, tokenLength);
-            token.precedence = 0;
             if (prevState == Operator) {
                 if (token.characters == "+" || token.characters == "-") {
                     token.precedence = 0;
@@ -66,12 +66,8 @@ std::vector<Token> tokenize(std::string line) {
 }
 
 std::vector<Token> shuntingYard(std::vector<Token> tokens) {
-    Token *outputQueue[256];
-    Token *operatorStack[256];
     std::vector<Token> queue;
     std::stack<Token> stack;
-    char queueEnd = 0;
-    char stackTop = 0;
     for (std::vector<Token>::iterator token = tokens.begin(); token != tokens.end(); ++token) {
         if (token->type == Number) {
             queue.push_back(*token);
@@ -112,7 +108,7 @@ double calculate(std::vector<Token> tokens) {
             stack.pop();
             Token left = stack.top();
             stack.pop();
-            double r;
+            double r = 0.0;
             if (token.characters == "+") {
                 r = left.value + right.value;
             } else if (token.characters == "-") {
@@ -125,7 +121,6 @@ double calculate(std::vector<Token> tokens) {
                 r = pow(left.value, right.value);
             }
             Token result;
-            result.type = Number;
             result.value = r;
             stack.push(result);
         }
